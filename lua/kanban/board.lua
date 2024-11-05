@@ -1,8 +1,12 @@
 local config = require("kanban").config
+local Utils = require("kanban.utils")
+
 local M = {}
 
 -- global boards
 M.boards = {}
+
+-- Board functions
 
 function M.create_new_board(name)
     local board = { name = name, columns = {}, order = {} }
@@ -28,6 +32,8 @@ end
 function M.delete_board(name)
     M.boards[name] = nil
 end
+
+-- Column functions
 
 function M.get_column_idx(board_name, col_name)
     local board = M.get_board(board_name)
@@ -60,28 +66,65 @@ function M.remove_column(board_name, col)
     table.remove(board.order, col_idx)
 end
 
+-- Item Functions
+
 function M.add_item(board_name, col, item)
     local board = M.get_board(board_name)
     table.insert(board.columns[col], item)
 end
 
-function M.remove_item(board_name, col, item_id) end
+function M.pop_item(board_name, col, item_idx)
+    local board = M.get_board(board_name)
+    return table.remove(board.columns[col], item_idx)
+end
+
+function M.move_item(board_name, src_col, dst_col, src_item_idx)
+    local popped = M.pop_item(board_name, src_col, src_item_idx)
+    M.add_item(board_name, dst_col, popped)
+end
+
+function M.reorder_item(board_name, col, item_idx, dir)
+    local board = M.get_board(board_name)
+    local items = board.columns[col]
+
+    if dir == "U" then
+        if item_idx <= 1 then
+            return
+        end
+
+        local dst_idx = item_idx - 1
+        Utils.swap(items, item_idx, dst_idx)
+    elseif dir == "D" then
+        if item_idx >= #items then
+            return
+        end
+
+        local dst_idx = item_idx + 1
+        Utils.swap(items, item_idx, dst_idx)
+    else
+        print("Direction not supported")
+    end
+end
 
 local MarkdownWriter = require("kanban.markdown.writer")
 local Data = require("kanban.data")
 local board = M.create_new_board("TEST")
 
--- print("Before")
--- print(vim.inspect(board))
--- M.add_column("TEST", "test_col")
--- M.add_column("TEST", "test_col2")
--- M.remove_column("TEST", "test_col")
--- M.remove_column("TEST", "Testing")
--- M.add_item("TEST", "Backlog", "what's uppp")
--- M.add_item("TEST", "Backlog", "nothing much")
--- M.add_item("TEST", "Backlog", "joe mama")
--- print("After")
--- print(vim.inspect(board))
+M.add_column("TEST", "test_col")
+M.add_column("TEST", "test_col2")
+M.remove_column("TEST", "test_col")
+M.remove_column("TEST", "Testing")
+M.add_item("TEST", "Backlog", "what's uppp")
+M.add_item("TEST", "Backlog", "nothing much")
+M.add_item("TEST", "Backlog", "joe mama")
+print("Before")
+print(vim.inspect(board))
+-- M.pop_item("TEST", "Backlog", 2)
+-- M.move_item("TEST", "Backlog", "Done", 1)
+M.reorder_item("TEST", "Backlog", 2, "D")
+M.reorder_item("TEST", "Backlog", 3, "D")
+print("After")
+print(vim.inspect(board))
 
 -- print("\nBoards")
 -- print(vim.inspect(M.boards))
