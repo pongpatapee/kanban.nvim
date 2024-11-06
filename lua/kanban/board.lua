@@ -66,41 +66,41 @@ function M.remove_column(board_name, col)
     table.remove(board.order, col_idx)
 end
 
--- Item Functions
+-- Task Functions
 
-function M.add_item(board_name, col, item)
+function M.add_task(board_name, col, task)
     local board = M.get_board(board_name)
-    table.insert(board.columns[col], item)
+    table.insert(board.columns[col], task)
 end
 
-function M.pop_item(board_name, col, item_idx)
+function M.pop_task(board_name, col, task_idx)
     local board = M.get_board(board_name)
-    return table.remove(board.columns[col], item_idx)
+    return table.remove(board.columns[col], task_idx)
 end
 
-function M.move_item(board_name, src_col, dst_col, src_item_idx)
-    local popped = M.pop_item(board_name, src_col, src_item_idx)
-    M.add_item(board_name, dst_col, popped)
+function M.move_task(board_name, src_col, dst_col, src_task_idx)
+    local popped = M.pop_task(board_name, src_col, src_task_idx)
+    M.add_task(board_name, dst_col, popped)
 end
 
-function M.reorder_item(board_name, col, item_idx, dir)
+function M.reorder_task(board_name, col, task_idx, dir)
     local board = M.get_board(board_name)
-    local items = board.columns[col]
+    local tasks = board.columns[col]
 
     if dir == "U" then
-        if item_idx <= 1 then
+        if task_idx <= 1 then
             return
         end
 
-        local dst_idx = item_idx - 1
-        Utils.swap(items, item_idx, dst_idx)
+        local dst_idx = task_idx - 1
+        Utils.swap(tasks, task_idx, dst_idx)
     elseif dir == "D" then
-        if item_idx >= #items then
+        if task_idx >= #tasks then
             return
         end
 
-        local dst_idx = item_idx + 1
-        Utils.swap(items, item_idx, dst_idx)
+        local dst_idx = task_idx + 1
+        Utils.swap(tasks, task_idx, dst_idx)
     else
         print("Direction not supported")
     end
@@ -114,21 +114,21 @@ M.add_column("TEST", "test_col")
 M.add_column("TEST", "test_col2")
 M.remove_column("TEST", "test_col")
 M.remove_column("TEST", "Testing")
-M.add_item("TEST", "Backlog", "what's uppp")
-M.add_item("TEST", "Backlog", "nothing much")
-M.add_item("TEST", "Backlog", "joe mama")
+M.add_task("TEST", "Backlog", "what's uppp")
+M.add_task("TEST", "Backlog", "nothing much")
+M.add_task("TEST", "Backlog", "joe mama")
 print("Before")
 print(vim.inspect(board))
--- M.pop_item("TEST", "Backlog", 2)
--- M.move_item("TEST", "Backlog", "Done", 1)
-M.reorder_item("TEST", "Backlog", 2, "D")
-M.reorder_item("TEST", "Backlog", 3, "D")
+-- M.pop_task("TEST", "Backlog", 2)
+-- M.move_task("TEST", "Backlog", "Done", 1)
+M.reorder_task("TEST", "Backlog", 2, "D")
+M.reorder_task("TEST", "Backlog", 3, "D")
 print("After")
 print(vim.inspect(board))
 
 -- print("\nBoards")
 -- print(vim.inspect(M.boards))
--- local markdown_content = MarkdownWriter.generate_markdown(board)
+-- local markdown_content = MarkdownWriter.write(board)
 
 -- Data.write_file("TEST.md", markdown_content)
 

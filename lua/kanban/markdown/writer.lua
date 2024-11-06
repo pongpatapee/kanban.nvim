@@ -1,6 +1,6 @@
 local M = {}
 
-function M.generate_markdown(board)
+function M.write(board)
     local markdown = {}
 
     table.insert(markdown, "# " .. board.name .. "\n")
