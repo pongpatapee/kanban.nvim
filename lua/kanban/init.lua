@@ -1,4 +1,11 @@
+--- @class Kanban
+--- @field config table
+--- @field boards Board[]
+
 local M = {}
+
+-- global boards
+M.boards = {}
 
 M.config = {
     columns = { "Backlog", "In-progress", "Testing", "Done" },

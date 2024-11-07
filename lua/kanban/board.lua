@@ -1,45 +1,57 @@
-local config = require("kanban").config
+local Kanban = require("kanban")
 local Utils = require("kanban.utils")
 
-local M = {}
+-- Might change task from string to table
+--- @alias Task any
 
--- global boards
-M.boards = {}
+--- @class Board
+--- @field name string
+--- @field columns table<string, Task[]>
+--- @field order string[]
+local M = {}
 
 -- Board functions
 
+--- @param name string
+--- @return Board
 function M.create_new_board(name)
     local board = { name = name, columns = {}, order = {} }
 
-    for _, col in ipairs(config.columns) do
+    for _, col in ipairs(Kanban.config.columns) do
         table.insert(board.order, col)
         board.columns[col] = {}
     end
 
-    M.boards[name] = board
+    Kanban.boards[name] = board
 
     return board
 end
 
+--- @param name string
+--- @return Board
 function M.get_board(name)
     -- TODO: if board not in memory
     -- check file sys
     -- and error check for board not existing
 
-    return M.boards[name]
+    return Kanban.boards[name]
 end
 
+--- @param name string
 function M.delete_board(name)
-    M.boards[name] = nil
+    Kanban.boards[name] = nil
 end
 
 -- Column functions
 
-function M.get_column_idx(board_name, col_name)
+--- @param board_name string
+--- @param col string
+--- @return integer
+function M.get_column_idx(board_name, col)
     local board = M.get_board(board_name)
 
-    for i, col in ipairs(board.order) do
-        if col == col_name then
+    for i, col_name in ipairs(board.order) do
+        if col_name == col then
             return i
         end
     end
@@ -47,6 +59,8 @@ function M.get_column_idx(board_name, col_name)
     return -1
 end
 
+--- @param board_name string
+--- @param col string
 function M.add_column(board_name, col)
     local board = M.get_board(board_name)
 
@@ -58,6 +72,8 @@ function M.add_column(board_name, col)
     board.columns[col] = {}
 end
 
+--- @param board_name string
+--- @param col string
 function M.remove_column(board_name, col)
     local board = M.get_board(board_name)
 
@@ -68,21 +84,36 @@ end
 
 -- Task Functions
 
+--- @param board_name string
+--- @param col string
+--- @param task Task
 function M.add_task(board_name, col, task)
     local board = M.get_board(board_name)
     table.insert(board.columns[col], task)
 end
 
+--- @param board_name string
+--- @param col string
+--- @param task_idx integer
+--- @return Task | nil
 function M.pop_task(board_name, col, task_idx)
     local board = M.get_board(board_name)
     return table.remove(board.columns[col], task_idx)
 end
 
+--- @param board_name string
+--- @param src_col string
+--- @param dst_col string
+--- @param src_task_idx integer
 function M.move_task(board_name, src_col, dst_col, src_task_idx)
     local popped = M.pop_task(board_name, src_col, src_task_idx)
     M.add_task(board_name, dst_col, popped)
 end
 
+--- @param board_name string
+--- @param col string
+--- @param task_idx integer
+--- @param dir "'U'" | "'D'"
 function M.reorder_task(board_name, col, task_idx, dir)
     local board = M.get_board(board_name)
     local tasks = board.columns[col]
@@ -127,7 +158,7 @@ print("After")
 print(vim.inspect(board))
 
 -- print("\nBoards")
--- print(vim.inspect(M.boards))
+-- print(vim.inspect(Kanban.boards))
 -- local markdown_content = MarkdownWriter.write(board)
 
 -- Data.write_file("TEST.md", markdown_content)
