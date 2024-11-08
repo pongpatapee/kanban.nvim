@@ -7,7 +7,7 @@ local Utils = require("kanban.utils")
 --- @class Board
 --- @field name string
 --- @field columns table<string, Task[]>
---- @field order string[]
+--- @field col_order string[]
 local M = {}
 
 -- Board functions
@@ -15,10 +15,10 @@ local M = {}
 --- @param name string
 --- @return Board
 function M.create_new_board(name)
-    local board = { name = name, columns = {}, order = {} }
+    local board = { name = name, columns = {}, col_order = {} }
 
     for _, col in ipairs(Kanban.config.columns) do
-        table.insert(board.order, col)
+        table.insert(board.col_order, col)
         board.columns[col] = {}
     end
 
@@ -50,7 +50,7 @@ end
 function M.get_column_idx(board_name, col)
     local board = M.get_board(board_name)
 
-    for i, col_name in ipairs(board.order) do
+    for i, col_name in ipairs(board.col_order) do
         if col_name == col then
             return i
         end
@@ -68,7 +68,7 @@ function M.add_column(board_name, col)
         return
     end
 
-    table.insert(board.order, col)
+    table.insert(board.col_order, col)
     board.columns[col] = {}
 end
 
@@ -79,7 +79,7 @@ function M.remove_column(board_name, col)
 
     board.columns[col] = nil
     local col_idx = M.get_column_idx(board_name, col)
-    table.remove(board.order, col_idx)
+    table.remove(board.col_order, col_idx)
 end
 
 -- Task Functions
